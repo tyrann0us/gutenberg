@@ -318,6 +318,10 @@ export function RichTextWrapper(
 		);
 	}
 
+	const elementPlaceholder = props[ 'data-custom-placeholder' ]
+		? placeholder
+		: bindingsPlaceholder || placeholder;
+
 	const {
 		value,
 		getValue,
@@ -334,7 +338,7 @@ export function RichTextWrapper(
 		selectionStart,
 		selectionEnd,
 		onSelectionChange,
-		placeholder: placeholder || bindingsPlaceholder,
+		placeholder: elementPlaceholder,
 		__unstableIsSelected: isSelected,
 		__unstableDisableFormats: disableFormats,
 		preserveWhiteSpace,
@@ -405,9 +409,7 @@ export function RichTextWrapper(
 				aria-multiline={ ! disableLineBreaks }
 				aria-readonly={ shouldDisableEditing }
 				{ ...props }
-				aria-label={
-					props[ 'aria-label' ] || placeholder || bindingsPlaceholder
-				}
+				aria-label={ elementPlaceholder || props[ 'aria-label' ] }
 				{ ...autocompleteProps }
 				ref={ useMergeRefs( [
 					// Rich text ref must be first because its focus listener
