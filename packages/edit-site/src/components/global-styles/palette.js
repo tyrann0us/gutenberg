@@ -28,6 +28,10 @@ const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 const EMPTY_COLORS = [];
 
+function generateBlockScreenPath( blockName ) {
+	return `/blocks/${ blockName.replace( '/', '_' ) }`;
+}
+
 function Palette( { name } ) {
 	const [ customColors ] = useGlobalSetting( 'color.palette.custom' );
 	const [ themeColors ] = useGlobalSetting( 'color.palette.theme' );
@@ -53,7 +57,7 @@ function Palette( { name } ) {
 
 	const screenPath = ! name
 		? '/colors/palette'
-		: '/blocks/' + encodeURIComponent( name ) + '/colors/palette';
+		: generateBlockScreenPath( name ) + '/colors/palette';
 	const paletteButtonText =
 		colors.length > 0 ? __( 'Edit palette' ) : __( 'Add colors' );
 

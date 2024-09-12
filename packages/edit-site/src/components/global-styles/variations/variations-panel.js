@@ -23,6 +23,10 @@ function getFilteredBlockStyles( blockStyles, variations ) {
 	);
 }
 
+function generateBlockScreenPath( blockName ) {
+	return `/blocks/${ blockName.replace( '/', '_' ) }`;
+}
+
 export function useBlockVariations( name ) {
 	const blockStyles = useSelect(
 		( select ) => {
@@ -50,8 +54,7 @@ export function VariationsPanel( { name } ) {
 					<NavigationButtonAsItem
 						key={ index }
 						path={
-							'/blocks/' +
-							encodeURIComponent( name ) +
+							generateBlockScreenPath( name ) +
 							'/variations/' +
 							encodeURIComponent( style.name )
 						}

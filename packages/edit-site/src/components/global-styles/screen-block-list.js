@@ -80,6 +80,10 @@ export function useBlockHasGlobalStyles( blockName ) {
 	return hasGlobalStyles;
 }
 
+function generateBlockScreenPath( blockName ) {
+	return `/blocks/${ blockName.replace( '/', '_' ) }`;
+}
+
 function BlockMenuItem( { block } ) {
 	const hasBlockMenuItem = useBlockHasGlobalStyles( block.name );
 	if ( ! hasBlockMenuItem ) {
@@ -94,7 +98,7 @@ function BlockMenuItem( { block } ) {
 
 	return (
 		<NavigationButtonAsItem
-			path={ '/blocks/' + encodeURIComponent( block.name ) }
+			path={ generateBlockScreenPath( block.name ) }
 			aria-label={ navigationButtonLabel }
 		>
 			<HStack justify="flex-start">

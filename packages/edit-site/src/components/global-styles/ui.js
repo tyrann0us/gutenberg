@@ -179,6 +179,10 @@ function ContextScreens( { name, parentMenu = '' } ) {
 	);
 }
 
+function generateBlockScreenPath( blockName ) {
+	return `/blocks/${ blockName.replace( '/', '_' ) }`;
+}
+
 function GlobalStylesStyleBook() {
 	const navigator = useNavigator();
 	const { path } = navigator.location;
@@ -188,14 +192,12 @@ function GlobalStylesStyleBook() {
 				// Match '/blocks/core%2Fbutton' and
 				// '/blocks/core%2Fbutton/typography', but not
 				// '/blocks/core%2Fbuttons'.
-				path === `/blocks/${ encodeURIComponent( blockName ) }` ||
-				path.startsWith(
-					`/blocks/${ encodeURIComponent( blockName ) }/`
-				)
+				path === generateBlockScreenPath( blockName ) ||
+				path.startsWith( `${ generateBlockScreenPath( blockName ) }/` )
 			}
 			onSelect={ ( blockName ) => {
 				// Now go to the selected block.
-				navigator.goTo( '/blocks/' + encodeURIComponent( blockName ) );
+				navigator.goTo( generateBlockScreenPath( blockName ) );
 			} }
 		/>
 	);
@@ -228,7 +230,7 @@ function GlobalStylesBlockLink() {
 		) {
 			return;
 		}
-		const newPath = '/blocks/' + encodeURIComponent( selectedBlockName );
+		const newPath = generateBlockScreenPath( selectedBlockName );
 		// Avoid navigating to the same path. This can happen when selecting
 		// a new block of the same type.
 		if ( newPath !== currentPath ) {
@@ -374,7 +376,7 @@ function GlobalStylesUI() {
 			{ blocks.map( ( block ) => (
 				<GlobalStylesNavigationScreen
 					key={ 'menu-block-' + block.name }
-					path={ '/blocks/' + encodeURIComponent( block.name ) }
+					path={ generateBlockScreenPath( block.name ) }
 				>
 					<ScreenBlock name={ block.name } />
 				</GlobalStylesNavigationScreen>
@@ -386,7 +388,7 @@ function GlobalStylesUI() {
 				<ContextScreens
 					key={ 'screens-block-' + block.name }
 					name={ block.name }
-					parentMenu={ '/blocks/' + encodeURIComponent( block.name ) }
+					parentMenu={ generateBlockScreenPath( block.name ) }
 				/>
 			) ) }
 
