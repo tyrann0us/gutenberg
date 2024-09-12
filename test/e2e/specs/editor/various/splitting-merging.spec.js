@@ -373,6 +373,92 @@ test.describe( 'splitting and merging blocks (@firefox, @webkit)', () => {
 		);
 	} );
 
+	// Fix for https://github.com/WordPress/gutenberg/issues/65174.
+	test( 'should not merge blocks with empty contents', async ( {
+		editor,
+		page,
+	} ) => {
+		await editor.insertBlock( {
+			name: 'core/group',
+			innerBlocks: [
+				// Unmodified block.
+				{ name: 'core/paragraph', attributes: { content: '' } },
+				// An "empty" but modified block.
+				{
+					name: 'core/heading',
+					attributes: { content: '', textAlign: 'center' },
+				},
+				// A non-empty block.
+				{ name: 'core/paragraph', attributes: { content: 'p' } },
+				// Just a placeholder.
+				{ name: 'core/spacer' },
+			],
+		} );
+		await editor.canvas
+			.getByRole( 'document', { name: 'Empty block' } )
+			.focus();
+
+		await page.keyboard.press( 'Backspace' );
+		await expect
+			.poll(
+				editor.getBlocks,
+				'Pressing backspace should remove the unmodified block'
+			)
+			.toMatchObject( [
+				{
+					name: 'core/group',
+					innerBlocks: [
+						{
+							name: 'core/heading',
+							attributes: { content: '', textAlign: 'center' },
+						},
+						{
+							name: 'core/paragraph',
+							attributes: { content: 'p' },
+						},
+						{ name: 'core/spacer' },
+					],
+				},
+			] );
+
+		// The caret is moved to the beginning of the heading block.
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'Backspace' );
+		await expect
+			.poll(
+				editor.getBlocks,
+				'Pressing backspace should remove the empty (content) block'
+			)
+			.toMatchObject( [
+				{
+					name: 'core/group',
+					innerBlocks: [
+						{
+							name: 'core/paragraph',
+							attributes: { content: 'p' },
+						},
+						{ name: 'core/spacer' },
+					],
+				},
+			] );
+
+		// The caret is moved to the beginning of the "p" paragraph.
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'Backspace' );
+		await expect
+			.poll( editor.getBlocks, 'Should "unwrap" a non-empty block' )
+			.toMatchObject( [
+				{
+					name: 'core/paragraph',
+					attributes: { content: 'p' },
+				},
+				{
+					name: 'core/group',
+					innerBlocks: [ { name: 'core/spacer' } ],
+				},
+			] );
+	} );
+
 	test.describe( 'test restore selection when merge produces more than one block', () => {
 		const snap1 = [
 			{

@@ -9,6 +9,7 @@ import {
 	setDefaultBlockName,
 } from '../registration';
 import {
+	isUnmodifiedBlock,
 	isUnmodifiedDefaultBlock,
 	getAccessibleBlockLabel,
 	getBlockLabel,
@@ -394,5 +395,40 @@ describe( '__experimentalGetBlockAttributesNamesByRole', () => {
 				'content'
 			)
 		).toEqual( [] );
+	} );
+} );
+
+describe( 'isUnmodifiedBlock', () => {
+	beforeAll( () => {
+		registerBlockType( 'core/test-block', {
+			title: 'Test block',
+			attributes: {
+				content: {
+					type: 'rich-text',
+					__experimentalRole: 'content',
+				},
+				placeholder: { type: 'rich-text' },
+			},
+		} );
+	} );
+
+	afterAll( () => {
+		unregisterBlockType( 'core/test-block' );
+	} );
+
+	it( 'should return true if the block is unmodified', () => {
+		const block = createBlock( 'core/test-block' );
+		expect( isUnmodifiedBlock( block ) ).toBe( true );
+
+		block.attributes.content = 'modified';
+		expect( isUnmodifiedBlock( block ) ).toBe( false );
+	} );
+
+	it( 'should only check the attribute keys', () => {
+		const block = createBlock( 'core/test-block', {
+			placeholder: 'Type here...',
+		} );
+		expect( isUnmodifiedBlock( block ) ).toBe( false );
+		expect( isUnmodifiedBlock( block, [ 'content' ] ) ).toBe( true );
 	} );
 } );

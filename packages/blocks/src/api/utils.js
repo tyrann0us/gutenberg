@@ -33,31 +33,38 @@ const ICON_COLORS = [ '#191e23', '#f8f9f9' ];
  * Determines whether the block's attributes are equal to the default attributes
  * which means the block is unmodified.
  *
- * @param {WPBlock} block Block Object
+ * @param {WPBlock}   block         Block Object
+ * @param {?string[]} attributeKeys The optional keys of the attributes to check.
  *
  * @return {boolean} Whether the block is an unmodified block.
  */
-export function isUnmodifiedBlock( block ) {
-	return Object.entries( getBlockType( block.name )?.attributes ?? {} ).every(
-		( [ key, definition ] ) => {
-			const value = block.attributes[ key ];
-
-			// Every attribute that has a default must match the default.
-			if ( definition.hasOwnProperty( 'default' ) ) {
-				return value === definition.default;
-			}
-
-			// The rich text type is a bit different from the rest because it
-			// has an implicit default value of an empty RichTextData instance,
-			// so check the length of the value.
-			if ( definition.type === 'rich-text' ) {
-				return ! value?.length;
-			}
-
-			// Every attribute that doesn't have a default should be undefined.
-			return value === undefined;
-		}
+export function isUnmodifiedBlock( block, attributeKeys ) {
+	let attributeEntries = Object.entries(
+		getBlockType( block.name )?.attributes ?? {}
 	);
+	if ( attributeKeys ) {
+		attributeEntries = attributeEntries.filter( ( [ key ] ) =>
+			attributeKeys.includes( key )
+		);
+	}
+	return attributeEntries.every( ( [ key, definition ] ) => {
+		const value = block.attributes[ key ];
+
+		// Every attribute that has a default must match the default.
+		if ( definition.hasOwnProperty( 'default' ) ) {
+			return value === definition.default;
+		}
+
+		// The rich text type is a bit different from the rest because it
+		// has an implicit default value of an empty RichTextData instance,
+		// so check the length of the value.
+		if ( definition.type === 'rich-text' ) {
+			return ! value?.length;
+		}
+
+		// Every attribute that doesn't have a default should be undefined.
+		return value === undefined;
+	} );
 }
 
 /**

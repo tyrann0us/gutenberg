@@ -24,6 +24,7 @@ import {
 	isReusableBlock,
 	getBlockDefaultClassName,
 	hasBlockSupport,
+	__experimentalGetBlockAttributesNamesByRole,
 	store as blocksStore,
 } from '@wordpress/blocks';
 import { withFilters } from '@wordpress/components';
@@ -330,6 +331,24 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 			}
 
 			/**
+			 * Return true if the block content is empty.
+			 * @param {string} blockClientId The block client ID.
+			 * @return {boolean} Whether the block content is empty.
+			 */
+			function isBlockContentEmpty( blockClientId ) {
+				const blockName = getBlockName( blockClientId );
+				const contentAttributes =
+					__experimentalGetBlockAttributesNamesByRole(
+						blockName,
+						'content'
+					);
+				return isUnmodifiedBlock(
+					getBlock( blockClientId ),
+					contentAttributes
+				);
+			}
+
+			/**
 			 * Moves the block with clientId up one level. If the block type
 			 * cannot be inserted at the new location, it will be attempted to
 			 * convert to the default block type.
@@ -350,7 +369,11 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 					removeBlock( _clientId );
 				} else {
 					registry.batch( () => {
-						if (
+						// Remove the block if its content is considered empty.
+						// Fix for https://github.com/WordPress/gutenberg/issues/65174.
+						if ( isBlockContentEmpty( firstClientId ) ) {
+							removeBlock( firstClientId, true );
+						} else if (
 							canInsertBlockType(
 								getBlockName( firstClientId ),
 								targetRootClientId
