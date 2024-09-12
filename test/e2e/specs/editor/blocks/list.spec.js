@@ -1237,17 +1237,17 @@ test.describe( 'List (@firefox)', () => {
 		await page.keyboard.press( 'Backspace' );
 		await page.keyboard.press( 'Backspace' );
 
-		await expect.poll( editor.getEditedPostContent ).toBe(
-			`<!-- wp:paragraph -->
-<p></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:list -->
-<ul class="wp-block-list"><!-- wp:list-item -->
-<li>2</li>
-<!-- /wp:list-item --></ul>
-<!-- /wp:list -->`
-		);
+		await expect.poll( editor.getBlocks ).toMatchObject( [
+			{
+				name: 'core/list',
+				innerBlocks: [
+					{
+						name: 'core/list-item',
+						attributes: { content: '2' },
+					},
+				],
+			},
+		] );
 	} );
 
 	test( 'should not change the contents when you change the list type to Ordered', async ( {
