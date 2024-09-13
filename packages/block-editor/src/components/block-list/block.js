@@ -26,6 +26,7 @@ import {
 	hasBlockSupport,
 	__experimentalGetBlockAttributesNamesByRole,
 	store as blocksStore,
+	privateApis as blocksPrivateApis,
 } from '@wordpress/blocks';
 import { withFilters } from '@wordpress/components';
 import { withDispatch, useDispatch, useSelect } from '@wordpress/data';
@@ -46,6 +47,8 @@ import { useLayout } from './layout';
 import { PrivateBlockContext } from './private-block-context';
 
 import { unlock } from '../../lock-unlock';
+
+const { isAttributeUnmodified } = unlock( blocksPrivateApis );
 
 /**
  * Merges wrapper props with special handling for classNames and styles.
@@ -336,16 +339,18 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 			 * @return {boolean} Whether the block content is empty.
 			 */
 			function isBlockContentEmpty( blockClientId ) {
-				const blockName = getBlockName( blockClientId );
+				const block = getBlock( blockClientId );
+				const blockType = getBlockType( block.name );
 				const contentAttributes =
 					__experimentalGetBlockAttributesNamesByRole(
-						blockName,
+						block.name,
 						'content'
 					);
-				return isUnmodifiedBlock(
-					getBlock( blockClientId ),
-					contentAttributes
-				);
+				return contentAttributes.every( ( key ) => {
+					const value = block.attributes[ key ];
+					const definition = blockType.attributes[ key ];
+					return isAttributeUnmodified( definition, value );
+				} );
 			}
 
 			/**
@@ -375,6 +380,8 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 								targetRootClientId
 							) &&
 							// Don't move the block if its content is considered empty.
+							// Note that for a modified non-empty block, we still try to transform
+							// it to a default block.
 							// Fix for https://github.com/WordPress/gutenberg/issues/65174.
 							! isBlockContentEmpty( firstClientId )
 						) {

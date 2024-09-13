@@ -421,12 +421,12 @@ test.describe( 'splitting and merging blocks (@firefox, @webkit)', () => {
 				},
 			] );
 
-		// Move the caret is moved to the beginning of the heading block.
+		// Move the caret to the beginning of the heading block.
 		await page.keyboard.press( 'Backspace' );
 		await expect
 			.poll(
 				editor.getBlocks,
-				'Pressing backspace should transform the non-default empty block'
+				'Pressing backspace should still transform the empty block'
 			)
 			.toMatchObject( [
 				{

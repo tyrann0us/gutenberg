@@ -355,7 +355,6 @@ Determines whether the block's attributes are equal to the default attributes wh
 _Parameters_
 
 -   _block_ `WPBlock`: Block Object
--   _attributeKeys_ `?string[]`: The optional keys of the attributes to check.
 
 _Returns_
 

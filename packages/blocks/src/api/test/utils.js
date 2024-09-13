@@ -9,12 +9,12 @@ import {
 	setDefaultBlockName,
 } from '../registration';
 import {
-	isUnmodifiedBlock,
 	isUnmodifiedDefaultBlock,
 	getAccessibleBlockLabel,
 	getBlockLabel,
 	__experimentalSanitizeBlockAttributes,
 	__experimentalGetBlockAttributesNamesByRole,
+	isAttributeUnmodified,
 } from '../utils';
 
 const noop = () => {};
@@ -398,37 +398,53 @@ describe( '__experimentalGetBlockAttributesNamesByRole', () => {
 	} );
 } );
 
-describe( 'isUnmodifiedBlock', () => {
-	beforeAll( () => {
-		registerBlockType( 'core/test-block', {
-			title: 'Test block',
-			attributes: {
-				content: {
-					type: 'rich-text',
-					__experimentalRole: 'content',
-				},
-				placeholder: { type: 'rich-text' },
-			},
-		} );
-	} );
-
-	afterAll( () => {
-		unregisterBlockType( 'core/test-block' );
-	} );
-
+describe( 'isAttributeUnmodified', () => {
 	it( 'should return true if the block is unmodified', () => {
-		const block = createBlock( 'core/test-block' );
-		expect( isUnmodifiedBlock( block ) ).toBe( true );
-
-		block.attributes.content = 'modified';
-		expect( isUnmodifiedBlock( block ) ).toBe( false );
+		expect(
+			isAttributeUnmodified(
+				{ type: 'rich-text', __experimentalRole: 'content' },
+				''
+			)
+		).toBe( true );
+		expect(
+			isAttributeUnmodified(
+				{ type: 'rich-text', __experimentalRole: 'content' },
+				undefined
+			)
+		).toBe( true );
+		expect( isAttributeUnmodified( { type: 'string' }, undefined ) ).toBe(
+			true
+		);
+		expect(
+			isAttributeUnmodified(
+				{ type: 'string', default: 'default-value' },
+				'default-value'
+			)
+		).toBe( true );
 	} );
 
-	it( 'should only check the attribute keys', () => {
-		const block = createBlock( 'core/test-block', {
-			placeholder: 'Type here...',
-		} );
-		expect( isUnmodifiedBlock( block ) ).toBe( false );
-		expect( isUnmodifiedBlock( block, [ 'content' ] ) ).toBe( true );
+	it( 'should return false if the block is modified', () => {
+		expect(
+			isAttributeUnmodified(
+				{ type: 'rich-text', __experimentalRole: 'content' },
+				'something else'
+			)
+		).toBe( false );
+		expect(
+			isAttributeUnmodified( { type: 'string' }, 'something else' )
+		).toBe( false );
+		expect( isAttributeUnmodified( { type: 'string' }, '' ) ).toBe( false );
+		expect(
+			isAttributeUnmodified(
+				{ type: 'string', default: 'default-value' },
+				''
+			)
+		).toBe( false );
+		expect(
+			isAttributeUnmodified(
+				{ type: 'string', default: 'default-value' },
+				undefined
+			)
+		).toBe( false );
 	} );
 } );
