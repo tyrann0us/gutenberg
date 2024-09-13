@@ -262,7 +262,7 @@ _Returns_
 
 ### getBlockInsertionPoint
 
-Returns the insertion point, the index at which the new inserted block would be placed. Defaults to the last index.
+Returns the location of the insertion cue. Defaults to the last index.
 
 _Parameters_
 
@@ -988,7 +988,7 @@ _Returns_
 
 ### isBlockInsertionPointVisible
 
-Returns true if we should show the block insertion point.
+Returns true if the block insertion point is visible.
 
 _Parameters_
 

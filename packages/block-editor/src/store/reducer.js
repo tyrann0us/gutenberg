@@ -2086,7 +2086,7 @@ export function hoveredBlockClientId( state = false, action ) {
 }
 
 /**
- * Reducer setting the inserter insertion point
+ * Reducer setting the insertion point
  *
  * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.

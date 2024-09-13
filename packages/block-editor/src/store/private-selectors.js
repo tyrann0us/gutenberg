@@ -552,7 +552,7 @@ export function getSectionRootClientId( state ) {
 }
 
 /**
- * Where the inserter should insert into.
+ * Where the point where the next block will be inserted into.
  *
  * @param {Object} state
  * @return {Object} Of where the insertion point in the block editor is or null if none is set.
