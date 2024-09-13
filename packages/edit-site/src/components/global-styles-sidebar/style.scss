@@ -18,19 +18,24 @@
 }
 
 .edit-site-global-styles-sidebar {
-	display: flex;
-	flex-direction: column;
-	min-height: 100%;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: auto auto 1fr;
+	max-height: 100%;
 
-	&__panel,
-	&__navigator-provider {
-		display: flex;
-		flex-direction: column;
-		flex: 1;
+	&__panel {
+		height: 0;
+		min-height: 100%;
+
+		grid-row: 3 / 4;
+
+		@include break-medium() {
+			grid-row: 2 / 4;
+		}
 	}
 
-	&__navigator-screen {
-		flex: 1;
+	&__navigator-provider {
+		max-height: 100%;
 	}
 }
 
