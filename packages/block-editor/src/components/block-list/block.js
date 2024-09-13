@@ -674,7 +674,6 @@ function BlockListBlockProvider( props ) {
 					) && hasSelectedInnerBlock( clientId ),
 				blockApiVersion: blockType?.apiVersion || 1,
 				blockTitle: match?.title || blockType?.title,
-				editorMode,
 				isSubtreeDisabled:
 					blockEditingMode === 'disabled' &&
 					isBlockSubtreeDisabled( clientId ),
@@ -730,7 +729,6 @@ function BlockListBlockProvider( props ) {
 		themeSupportsLayout,
 		isTemporarilyEditingAsBlocks,
 		blockEditingMode,
-		editorMode,
 		mayDisplayControls,
 		mayDisplayParentControls,
 		index,
@@ -785,7 +783,6 @@ function BlockListBlockProvider( props ) {
 		hasOverlay,
 		initialPosition,
 		blockEditingMode,
-		editorMode,
 		isHighlighted,
 		isMultiSelected,
 		isPartiallySelected,
