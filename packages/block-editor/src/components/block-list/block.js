@@ -369,15 +369,14 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 					removeBlock( _clientId );
 				} else {
 					registry.batch( () => {
-						// Remove the block if its content is considered empty.
-						// Fix for https://github.com/WordPress/gutenberg/issues/65174.
-						if ( isBlockContentEmpty( firstClientId ) ) {
-							removeBlock( firstClientId, true );
-						} else if (
+						if (
 							canInsertBlockType(
 								getBlockName( firstClientId ),
 								targetRootClientId
-							)
+							) &&
+							// Don't move the block if its content is considered empty.
+							// Fix for https://github.com/WordPress/gutenberg/issues/65174.
+							! isBlockContentEmpty( firstClientId )
 						) {
 							moveBlocksToPosition(
 								[ firstClientId ],

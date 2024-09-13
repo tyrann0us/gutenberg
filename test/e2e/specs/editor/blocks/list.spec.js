@@ -1238,6 +1238,7 @@ test.describe( 'List (@firefox)', () => {
 		await page.keyboard.press( 'Backspace' );
 
 		await expect.poll( editor.getBlocks ).toMatchObject( [
+			{ name: 'core/paragraph', attributes: { content: '' } },
 			{
 				name: 'core/list',
 				innerBlocks: [

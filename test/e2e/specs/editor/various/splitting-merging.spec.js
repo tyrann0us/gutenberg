@@ -421,15 +421,18 @@ test.describe( 'splitting and merging blocks (@firefox, @webkit)', () => {
 				},
 			] );
 
-		// The caret is moved to the beginning of the heading block.
-		await page.keyboard.press( 'ArrowDown' );
+		// Move the caret is moved to the beginning of the heading block.
 		await page.keyboard.press( 'Backspace' );
 		await expect
 			.poll(
 				editor.getBlocks,
-				'Pressing backspace should remove the empty (content) block'
+				'Pressing backspace should transform the non-default empty block'
 			)
 			.toMatchObject( [
+				{
+					name: 'core/paragraph',
+					attributes: { content: '', align: 'center' },
+				},
 				{
 					name: 'core/group',
 					innerBlocks: [
@@ -442,12 +445,18 @@ test.describe( 'splitting and merging blocks (@firefox, @webkit)', () => {
 				},
 			] );
 
-		// The caret is moved to the beginning of the "p" paragraph.
+		// Move the caret to the beginning of the "p" paragraph.
 		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'ArrowLeft' );
 		await page.keyboard.press( 'Backspace' );
 		await expect
 			.poll( editor.getBlocks, 'Should "unwrap" a non-empty block' )
 			.toMatchObject( [
+				{
+					name: 'core/paragraph',
+					attributes: { content: '', align: 'center' },
+				},
 				{
 					name: 'core/paragraph',
 					attributes: { content: 'p' },
