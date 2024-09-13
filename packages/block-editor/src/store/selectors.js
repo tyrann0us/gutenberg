@@ -1462,11 +1462,11 @@ export const getBlockInsertionPoint = createSelector(
 		let rootClientId, index;
 
 		const {
-			insertionPoint,
+			insertionCue,
 			selection: { selectionEnd },
 		} = state;
-		if ( insertionPoint !== null ) {
-			return insertionPoint;
+		if ( insertionCue !== null ) {
+			return insertionCue;
 		}
 
 		const { clientId } = selectionEnd;
@@ -1481,7 +1481,7 @@ export const getBlockInsertionPoint = createSelector(
 		return { rootClientId, index };
 	},
 	( state ) => [
-		state.insertionPoint,
+		state.insertionCue,
 		state.selection.selectionEnd.clientId,
 		state.blocks.parents,
 		state.blocks.order,
@@ -1496,7 +1496,7 @@ export const getBlockInsertionPoint = createSelector(
  * @return {?boolean} Whether the insertion point is visible or not.
  */
 export function isBlockInsertionPointVisible( state ) {
-	return state.insertionPoint !== null;
+	return state.insertionCue !== null;
 }
 
 /**
