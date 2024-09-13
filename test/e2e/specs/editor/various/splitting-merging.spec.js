@@ -374,24 +374,38 @@ test.describe( 'splitting and merging blocks (@firefox, @webkit)', () => {
 	} );
 
 	// Fix for https://github.com/WordPress/gutenberg/issues/65174.
-	test( 'should not merge blocks with empty contents', async ( {
+	test( 'should handle unwrapping and merging blocks', async ( {
 		editor,
 		page,
 	} ) => {
+		const defaultUnmodifiedBlock = {
+			name: 'core/paragraph',
+			attributes: { content: '', align: undefined, dropCap: false },
+			innerBlocks: [],
+		};
+		const defaultEmptyBlock = {
+			name: 'core/paragraph',
+			attributes: { content: '', align: 'center', dropCap: false },
+			innerBlocks: [],
+		};
+		const nonDefaultEmptyBlock = {
+			name: 'core/heading',
+			attributes: { content: '', textAlign: 'center', level: 2 },
+			innerBlocks: [],
+		};
+		const nonDefaultBlockWithContent = {
+			name: 'core/heading',
+			attributes: { content: 'heading', level: 2 },
+			innerBlocks: [],
+		};
+		const placeholderBlock = { name: 'core/separator' };
 		await editor.insertBlock( {
 			name: 'core/group',
 			innerBlocks: [
-				// Unmodified block.
-				{ name: 'core/paragraph', attributes: { content: '' } },
-				// An "empty" but modified block.
-				{
-					name: 'core/heading',
-					attributes: { content: '', textAlign: 'center' },
-				},
-				// A non-empty block.
-				{ name: 'core/paragraph', attributes: { content: 'p' } },
-				// Just a placeholder.
-				{ name: 'core/spacer' },
+				defaultEmptyBlock,
+				nonDefaultEmptyBlock,
+				nonDefaultBlockWithContent,
+				placeholderBlock,
 			],
 		} );
 		await editor.canvas
@@ -400,70 +414,93 @@ test.describe( 'splitting and merging blocks (@firefox, @webkit)', () => {
 
 		await page.keyboard.press( 'Backspace' );
 		await expect
-			.poll(
-				editor.getBlocks,
-				'Pressing backspace should remove the unmodified block'
-			)
-			.toMatchObject( [
+			.poll( editor.getBlocks, 'Reset the default empty block' )
+			.toEqual( [
 				{
 					name: 'core/group',
+					attributes: { tagName: 'div' },
 					innerBlocks: [
-						{
-							name: 'core/heading',
-							attributes: { content: '', textAlign: 'center' },
-						},
-						{
-							name: 'core/paragraph',
-							attributes: { content: 'p' },
-						},
-						{ name: 'core/spacer' },
+						defaultUnmodifiedBlock,
+						nonDefaultEmptyBlock,
+						nonDefaultBlockWithContent,
+						expect.objectContaining( placeholderBlock ),
+					],
+				},
+			] );
+		await page.keyboard.press( 'Backspace' );
+		await expect
+			.poll( editor.getBlocks, 'Remove the default unmodified block' )
+			.toEqual( [
+				{
+					name: 'core/group',
+					attributes: { tagName: 'div' },
+					innerBlocks: [
+						nonDefaultEmptyBlock,
+						nonDefaultBlockWithContent,
+						expect.objectContaining( placeholderBlock ),
 					],
 				},
 			] );
 
-		// Move the caret to the beginning of the heading block.
+		// The caret is at the beginning of the empty heading block.
 		await page.keyboard.press( 'Backspace' );
 		await expect
 			.poll(
 				editor.getBlocks,
-				'Pressing backspace should still transform the empty block'
+				'Lift and transform the non-default block to a default block'
 			)
-			.toMatchObject( [
-				{
-					name: 'core/paragraph',
-					attributes: { content: '', align: 'center' },
-				},
+			.toEqual( [
+				defaultEmptyBlock,
 				{
 					name: 'core/group',
+					attributes: { tagName: 'div' },
 					innerBlocks: [
-						{
-							name: 'core/paragraph',
-							attributes: { content: 'p' },
-						},
-						{ name: 'core/spacer' },
+						nonDefaultBlockWithContent,
+						expect.objectContaining( placeholderBlock ),
 					],
 				},
 			] );
 
-		// Move the caret to the beginning of the "p" paragraph.
+		// Move the caret to the beginning of the "heading" heading block.
 		await page.keyboard.press( 'ArrowDown' );
 		await page.keyboard.press( 'ArrowDown' );
-		await page.keyboard.press( 'ArrowLeft' );
+		await page.keyboard.press( 'Home' );
 		await page.keyboard.press( 'Backspace' );
 		await expect
-			.poll( editor.getBlocks, 'Should "unwrap" a non-empty block' )
-			.toMatchObject( [
+			.poll( editor.getBlocks, 'Lift the non-empty non-default block' )
+			.toEqual( [
+				defaultEmptyBlock,
+				nonDefaultBlockWithContent,
 				{
-					name: 'core/paragraph',
-					attributes: { content: '', align: 'center' },
+					name: 'core/group',
+					attributes: { tagName: 'div' },
+					innerBlocks: [
+						expect.objectContaining( placeholderBlock ),
+					],
 				},
+			] );
+		await page.keyboard.press( 'Backspace' );
+		await expect
+			.poll(
+				editor.getBlocks,
+				'Merge the non-empty non-default block with the default block'
+			)
+			.toEqual( [
 				{
 					name: 'core/paragraph',
-					attributes: { content: 'p' },
+					attributes: {
+						content: 'heading',
+						align: 'center',
+						dropCap: false,
+					},
+					innerBlocks: [],
 				},
 				{
 					name: 'core/group',
-					innerBlocks: [ { name: 'core/spacer' } ],
+					attributes: { tagName: 'div' },
+					innerBlocks: [
+						expect.objectContaining( placeholderBlock ),
+					],
 				},
 			] );
 	} );

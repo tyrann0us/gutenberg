@@ -24,6 +24,7 @@ import {
 	isReusableBlock,
 	getBlockDefaultClassName,
 	hasBlockSupport,
+	createBlock,
 	__experimentalGetBlockAttributesNamesByRole,
 	store as blocksStore,
 	privateApis as blocksPrivateApis,
@@ -311,6 +312,41 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 				canInsertBlockType,
 			} = registry.select( blockEditorStore );
 
+			function isBlockEmpty( block ) {
+				const blockType = getBlockType( block.name );
+				const contentAttributes =
+					__experimentalGetBlockAttributesNamesByRole(
+						block.name,
+						'content'
+					);
+				return contentAttributes.every( ( attribute ) => {
+					const definition = blockType.attributes[ attribute ];
+					const value = block.attributes[ attribute ];
+					return isAttributeUnmodified( definition, value );
+				} );
+			}
+
+			/**
+			 * Update the attributes to reset the block to the default state.
+			 * @param {WPBlock} block The block to reset.
+			 */
+			function resetBlockToDefault( block ) {
+				// Instead of replacing the block, only update the default attributes
+				// to keep any metadata intact.
+				const defaultBlockType = getBlockType( block.name );
+				const defaultBlockAttributes = createBlock(
+					block.name
+				).attributes;
+				for ( const key of Object.keys(
+					defaultBlockType.attributes
+				) ) {
+					if ( ! defaultBlockAttributes.hasOwnProperty( key ) ) {
+						defaultBlockAttributes[ key ] = undefined;
+					}
+				}
+				updateBlockAttributes( block.clientId, defaultBlockAttributes );
+			}
+
 			function switchToDefaultOrRemove() {
 				const block = getBlock( clientId );
 				const defaultBlockName = getDefaultBlockName();
@@ -334,26 +370,6 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 			}
 
 			/**
-			 * Return true if the block content is empty.
-			 * @param {string} blockClientId The block client ID.
-			 * @return {boolean} Whether the block content is empty.
-			 */
-			function isBlockContentEmpty( blockClientId ) {
-				const block = getBlock( blockClientId );
-				const blockType = getBlockType( block.name );
-				const contentAttributes =
-					__experimentalGetBlockAttributesNamesByRole(
-						block.name,
-						'content'
-					);
-				return contentAttributes.every( ( key ) => {
-					const value = block.attributes[ key ];
-					const definition = blockType.attributes[ key ];
-					return isAttributeUnmodified( definition, value );
-				} );
-			}
-
-			/**
 			 * Moves the block with clientId up one level. If the block type
 			 * cannot be inserted at the new location, it will be attempted to
 			 * convert to the default block type.
@@ -374,16 +390,16 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 					removeBlock( _clientId );
 				} else {
 					registry.batch( () => {
+						const firstBlock = getBlock( firstClientId );
+						const isFirstBlockEmpty = isBlockEmpty( firstBlock );
+
+						// Step 1: Lift the block to the parent if it's not "empty".
 						if (
 							canInsertBlockType(
 								getBlockName( firstClientId ),
 								targetRootClientId
 							) &&
-							// Don't move the block if its content is considered empty.
-							// Note that for a modified non-empty block, we still try to transform
-							// it to a default block.
-							// Fix for https://github.com/WordPress/gutenberg/issues/65174.
-							! isBlockContentEmpty( firstClientId )
+							! isFirstBlockEmpty
 						) {
 							moveBlocksToPosition(
 								[ firstClientId ],
@@ -392,21 +408,22 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 								getBlockIndex( _clientId )
 							);
 						} else {
+							const defaultBlockName = getDefaultBlockName();
 							const replacement = switchToBlockType(
-								getBlock( firstClientId ),
-								getDefaultBlockName()
+								firstBlock,
+								defaultBlockName
 							);
-
-							if (
-								replacement &&
-								replacement.length &&
+							const canTransformToDefaultBlock =
+								!! replacement?.length &&
 								replacement.every( ( block ) =>
 									canInsertBlockType(
 										block.name,
 										targetRootClientId
 									)
-								)
-							) {
+								);
+
+							// Step 2: Else, attempt to convert to the default block type.
+							if ( canTransformToDefaultBlock ) {
 								insertBlocks(
 									replacement,
 									getBlockIndex( _clientId ),
@@ -414,7 +431,18 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 									changeSelection
 								);
 								removeBlock( firstClientId, false );
-							} else {
+							}
+							// Step 3: If the block is a default block but modified and "empty",
+							// transform it into an unmodified block.
+							else if (
+								firstBlock.name === defaultBlockName &&
+								! isUnmodifiedDefaultBlock( firstBlock ) &&
+								isFirstBlockEmpty
+							) {
+								resetBlockToDefault( firstBlock );
+							}
+							// Step 4: Otherwise, continue the default behavior.
+							else {
 								switchToDefaultOrRemove();
 							}
 						}

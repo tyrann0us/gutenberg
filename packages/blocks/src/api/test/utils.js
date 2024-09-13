@@ -14,7 +14,6 @@ import {
 	getBlockLabel,
 	__experimentalSanitizeBlockAttributes,
 	__experimentalGetBlockAttributesNamesByRole,
-	isAttributeUnmodified,
 } from '../utils';
 
 const noop = () => {};
@@ -395,56 +394,5 @@ describe( '__experimentalGetBlockAttributesNamesByRole', () => {
 				'content'
 			)
 		).toEqual( [] );
-	} );
-} );
-
-describe( 'isAttributeUnmodified', () => {
-	it( 'should return true if the block is unmodified', () => {
-		expect(
-			isAttributeUnmodified(
-				{ type: 'rich-text', __experimentalRole: 'content' },
-				''
-			)
-		).toBe( true );
-		expect(
-			isAttributeUnmodified(
-				{ type: 'rich-text', __experimentalRole: 'content' },
-				undefined
-			)
-		).toBe( true );
-		expect( isAttributeUnmodified( { type: 'string' }, undefined ) ).toBe(
-			true
-		);
-		expect(
-			isAttributeUnmodified(
-				{ type: 'string', default: 'default-value' },
-				'default-value'
-			)
-		).toBe( true );
-	} );
-
-	it( 'should return false if the block is modified', () => {
-		expect(
-			isAttributeUnmodified(
-				{ type: 'rich-text', __experimentalRole: 'content' },
-				'something else'
-			)
-		).toBe( false );
-		expect(
-			isAttributeUnmodified( { type: 'string' }, 'something else' )
-		).toBe( false );
-		expect( isAttributeUnmodified( { type: 'string' }, '' ) ).toBe( false );
-		expect(
-			isAttributeUnmodified(
-				{ type: 'string', default: 'default-value' },
-				''
-			)
-		).toBe( false );
-		expect(
-			isAttributeUnmodified(
-				{ type: 'string', default: 'default-value' },
-				undefined
-			)
-		).toBe( false );
 	} );
 } );
