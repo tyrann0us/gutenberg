@@ -46,6 +46,7 @@ import { PrivateInserterLibrary } from './components/inserter/library';
 import { PrivatePublishDateTimePicker } from './components/publish-date-time-picker';
 import useSpacingSizes from './components/spacing-sizes-control/hooks/use-spacing-sizes';
 import useBlockDisplayTitle from './components/block-title/use-block-display-title';
+import BlockManager from './components/block-manager';
 import TabbedSidebar from './components/tabbed-sidebar';
 import { useBlockBindingsUtils } from './utils/block-bindings';
 
@@ -75,6 +76,7 @@ lock( privateApis, {
 	useLayoutStyles,
 	DimensionsTool,
 	ResolutionTool,
+	BlockManager,
 	TabbedSidebar,
 	TextAlignmentControl,
 	usesContextKey,
