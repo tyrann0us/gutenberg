@@ -422,7 +422,7 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 									)
 								);
 
-							// Step 2: Else, attempt to convert to the default block type.
+							// Step 2: Else, attempt to lift and convert to the default block type.
 							if ( canTransformToDefaultBlock ) {
 								insertBlocks(
 									replacement,
@@ -433,7 +433,7 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, registry ) => {
 								removeBlock( firstClientId, false );
 							}
 							// Step 3: If the block is a default block but modified and "empty",
-							// transform it into an unmodified block.
+							// transform it into an unmodified block (remove formatting).
 							else if (
 								firstBlock.name === defaultBlockName &&
 								! isUnmodifiedDefaultBlock( firstBlock ) &&
