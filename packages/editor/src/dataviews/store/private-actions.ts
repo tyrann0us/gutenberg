@@ -18,6 +18,7 @@ import permanentlyDeletePost from '../actions/permanently-delete-post';
 import renamePost from '../actions/rename-post';
 import reorderPage from '../actions/reorder-page';
 import restorePost from '../actions/restore-post';
+import setAsHomepage from '../actions/set-as-homepage';
 import type { PostType } from '../types';
 import { store as editorStore } from '../../store';
 import { unlock } from '../../lock-unlock';
@@ -115,6 +116,7 @@ export const registerPostTypeActions =
 				? reorderPage
 				: undefined,
 			postTypeConfig.slug === 'wp_block' ? exportPattern : undefined,
+			postTypeConfig.slug === 'page' ? setAsHomepage : undefined,
 			resetPost,
 			restorePost,
 			deletePost,
