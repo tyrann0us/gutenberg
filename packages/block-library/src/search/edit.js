@@ -462,6 +462,7 @@ export default function SearchEdit( {
 									widthUnit: '%',
 								} );
 							} }
+							isBlock
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
 						>
