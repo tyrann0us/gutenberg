@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
+import { mockReducedMotion } from '../../utils/unit-test-utils';
 import Guide from '..';
 
 const defaultProps = {
@@ -17,21 +18,14 @@ const defaultProps = {
 describe( 'Guide', () => {
 	// Mock `matchMedia` so that all animations are skipped,
 	// since js-dom does not support fully CSS animations.
-	const originalMatchMedia = window.matchMedia;
-	const mockedMatchMedia = jest.fn( ( query: string ) => {
-		if ( /prefers-reduced-motion/.test( query ) ) {
-			return { matches: true } as ReturnType< typeof window.matchMedia >;
-		}
-
-		return originalMatchMedia( query );
-	} );
+	const mockReducedMotionUtils = mockReducedMotion();
 
 	beforeAll( () => {
-		window.matchMedia = jest.fn( mockedMatchMedia );
+		mockReducedMotionUtils.beforeAll();
 	} );
 
 	afterAll( () => {
-		window.matchMedia = originalMatchMedia;
+		mockReducedMotionUtils.afterAll();
 	} );
 
 	it( 'renders nothing when there are no pages', () => {
