@@ -124,6 +124,7 @@ function WidthPanel( { selectedWidth, setAttributes } ) {
 				onChange={ ( newWidth ) =>
 					setAttributes( { width: newWidth } )
 				}
+				isBlock
 				isDeselectable
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
