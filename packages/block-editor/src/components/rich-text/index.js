@@ -164,7 +164,7 @@ export function RichTextWrapper(
 		isBlockSelected,
 	] );
 
-	const { disableBoundBlock, bindingsPlaceholder } = useSelect(
+	const { disableBoundBlock, bindingsPlaceholder, bindingsLabel } = useSelect(
 		( select ) => {
 			if (
 				! blockBindings?.[ identifier ] ||
@@ -186,6 +186,15 @@ export function RichTextWrapper(
 					args: relatedBinding.args,
 				} );
 
+			// Don't modify placeholders if value is not empty.
+			if ( adjustedValue.length > 0 ) {
+				return {
+					disableBoundBlock: _disableBoundBlock,
+				};
+			}
+
+			const { getBlockAttributes } = select( blockEditorStore );
+			const blockAttributes = getBlockAttributes( clientId );
 			const _bindingsPlaceholder = _disableBoundBlock
 				? relatedBinding?.args?.key || blockBindingsSource?.label
 				: sprintf(
@@ -193,12 +202,19 @@ export function RichTextWrapper(
 						__( 'Add %s' ),
 						relatedBinding?.args?.key || blockBindingsSource?.label
 				  );
+			const _bindingsLabel = _disableBoundBlock
+				? relatedBinding?.args?.key || blockBindingsSource?.label
+				: sprintf(
+						/* translators: %s: source label or key */
+						__( 'Empty %s; start writing to edit its value' ),
+						relatedBinding?.args?.key || blockBindingsSource?.label
+				  );
 
 			return {
 				disableBoundBlock: _disableBoundBlock,
 				bindingsPlaceholder:
-					( ! adjustedValue || adjustedValue.length === 0 ) &&
-					_bindingsPlaceholder,
+					blockAttributes?.placeholder || _bindingsPlaceholder,
+				bindingsLabel: _bindingsLabel,
 			};
 		},
 		[ blockBindings, identifier, blockName, blockContext, adjustedValue ]
@@ -408,7 +424,7 @@ export function RichTextWrapper(
 				aria-readonly={ shouldDisableEditing }
 				{ ...props }
 				aria-label={
-					bindingsPlaceholder || props[ 'aria-label' ] || placeholder
+					bindingsLabel || props[ 'aria-label' ] || placeholder
 				}
 				{ ...autocompleteProps }
 				ref={ useMergeRefs( [
