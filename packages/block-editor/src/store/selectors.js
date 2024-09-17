@@ -38,6 +38,8 @@ import {
 	getTemporarilyEditingAsBlocks,
 	getTemporarilyEditingFocusModeToRevert,
 	getSectionRootClientId,
+	getParentPatternCount,
+	getPatternBlockEditingMode,
 } from './private-selectors';
 
 /**
@@ -2929,6 +2931,11 @@ export const getBlockEditingMode = createRegistrySelector(
 			if ( clientId === null ) {
 				clientId = '';
 			}
+
+			if ( getParentPatternCount( state, clientId ) > 0 ) {
+				return getPatternBlockEditingMode( state, clientId );
+			}
+
 			// In zoom-out mode, override the behavior set by
 			// __unstableSetBlockEditingMode to only allow editing the top-level
 			// sections.
