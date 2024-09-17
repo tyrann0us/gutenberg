@@ -3,7 +3,10 @@
 const originalMatchMedia = window.matchMedia;
 const mockedMatchMedia = jest.fn( ( query ) => {
 	if ( /prefers-reduced-motion/.test( query ) ) {
-		return { matches: true };
+		return {
+			...originalMatchMedia( query ),
+			matches: true,
+		};
 	}
 
 	return originalMatchMedia( query );
