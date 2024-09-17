@@ -12,7 +12,6 @@ import { shortcutAriaLabel } from '@wordpress/keycodes';
 /**
  * Internal dependencies
  */
-import { mockReducedMotion } from '../../utils/unit-test-utils';
 import Modal from '../../modal';
 import Tooltip, { TOOLTIP_DELAY } from '..';
 
@@ -43,18 +42,6 @@ const hoverOutside = async () => {
 };
 
 describe( 'Tooltip', () => {
-	// Mock `matchMedia` so that all animations are skipped,
-	// since js-dom does not support fully CSS animations.
-	const mockReducedMotionUtils = mockReducedMotion();
-
-	beforeAll( () => {
-		mockReducedMotionUtils.beforeAll();
-	} );
-
-	afterAll( () => {
-		mockReducedMotionUtils.afterAll();
-	} );
-
 	describe( 'basic behavior', () => {
 		it( 'should not render the tooltip if multiple children are passed', async () => {
 			render(

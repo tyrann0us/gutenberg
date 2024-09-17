@@ -7,7 +7,6 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import { mockReducedMotion } from '../../utils/unit-test-utils';
 import Guide from '..';
 
 const defaultProps = {
@@ -16,18 +15,6 @@ const defaultProps = {
 };
 
 describe( 'Guide', () => {
-	// Mock `matchMedia` so that all animations are skipped,
-	// since js-dom does not support fully CSS animations.
-	const mockReducedMotionUtils = mockReducedMotion();
-
-	beforeAll( () => {
-		mockReducedMotionUtils.beforeAll();
-	} );
-
-	afterAll( () => {
-		mockReducedMotionUtils.afterAll();
-	} );
-
 	it( 'renders nothing when there are no pages', () => {
 		render( <Guide { ...defaultProps } pages={ [] } /> );
 		expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();

@@ -12,25 +12,12 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { mockReducedMotion } from '../../utils/unit-test-utils';
 import Modal from '../';
 import type { ModalProps } from '../types';
 
 const noop = () => {};
 
 describe( 'Modal', () => {
-	// Mock `matchMedia` so that all animations are skipped,
-	// since js-dom does not support fully CSS animations.
-	const mockReducedMotionUtils = mockReducedMotion();
-
-	beforeAll( () => {
-		mockReducedMotionUtils.beforeAll();
-	} );
-
-	afterAll( () => {
-		mockReducedMotionUtils.afterAll();
-	} );
-
 	it( 'applies the aria-describedby attribute when provided', () => {
 		render(
 			<Modal
