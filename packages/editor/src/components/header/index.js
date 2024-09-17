@@ -22,6 +22,7 @@ import PostPublishButtonOrToggle from '../post-publish-button/post-publish-butto
 import PostSavedState from '../post-saved-state';
 import PostViewLink from '../post-view-link';
 import PreviewDropdown from '../preview-dropdown';
+import ZoomOutToggle from '../zoom-out-toggle';
 import { store as editorStore } from '../../store';
 
 const toolbarVariations = {
@@ -46,8 +47,10 @@ function Header( {
 	forceDisableBlockTools,
 	setEntitiesSavedStatesCallback,
 	title,
-	icon,
 } ) {
+	const zoomOutExperimentEnabled =
+		window.__experimentalEnableZoomOutExperiment;
+
 	const isWideViewport = useViewportMatch( 'large' );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const isTooNarrowForDocumentBar = useMediaQuery( '(max-width: 403px)' );
@@ -57,7 +60,6 @@ function Header( {
 		showIconLabels,
 		hasFixedToolbar,
 		isNestedEntity,
-		isZoomedOutView,
 	} = useSelect( ( select ) => {
 		const { get: getPreference } = select( preferencesStore );
 		const {
@@ -118,7 +120,7 @@ function Header( {
 					variants={ toolbarVariations }
 					transition={ { type: 'tween' } }
 				>
-					<DocumentBar title={ title } icon={ icon } />
+					<DocumentBar title={ title } />
 				</motion.div>
 			) }
 			<motion.div
@@ -136,13 +138,20 @@ function Header( {
 				) }
 				<PreviewDropdown
 					forceIsAutosaveable={ forceIsDirty }
-					disabled={ isNestedEntity || isZoomedOutView }
+					disabled={ isNestedEntity }
 				/>
 				<PostPreviewButton
 					className="editor-header__post-preview-button"
 					forceIsAutosaveable={ forceIsDirty }
 				/>
 				<PostViewLink />
+
+				{ zoomOutExperimentEnabled && <ZoomOutToggle /> }
+
+				{ ( isWideViewport || ! showIconLabels ) && (
+					<PinnedItems.Slot scope="core" />
+				) }
+
 				{ ! customSaveButton && (
 					<PostPublishButtonOrToggle
 						forceIsDirty={ forceIsDirty }
@@ -151,10 +160,8 @@ function Header( {
 						}
 					/>
 				) }
+
 				{ customSaveButton }
-				{ ( isWideViewport || ! showIconLabels ) && (
-					<PinnedItems.Slot scope="core" />
-				) }
 				<MoreMenu />
 			</motion.div>
 		</div>

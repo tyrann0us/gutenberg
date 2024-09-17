@@ -23,10 +23,23 @@ const { GlobalStylesContext, cleanEmptyObject } = unlock(
 
 export function mergeBaseAndUserConfigs( base, user ) {
 	return deepmerge( base, user, {
-		// We only pass as arrays the presets,
-		// in which case we want the new array of values
-		// to override the old array (no merging).
+		/*
+		 * We only pass as arrays the presets,
+		 * in which case we want the new array of values
+		 * to override the old array (no merging).
+		 */
 		isMergeableObject: isPlainObject,
+		/*
+		 * Exceptions to the above rule.
+		 * Background images should be replaced, not merged,
+		 * as they themselves are specific object definitions for the style.
+		 */
+		customMerge: ( key ) => {
+			if ( key === 'backgroundImage' ) {
+				return ( baseConfig, userConfig ) => userConfig;
+			}
+			return undefined;
+		},
 	} );
 }
 
@@ -133,13 +146,17 @@ function useGlobalStylesUserConfig() {
 
 function useGlobalStylesBaseConfig() {
 	const baseConfig = useSelect( ( select ) => {
-		const { __experimentalGetCurrentThemeBaseGlobalStyles, canUser } =
-			select( coreStore );
+		const {
+			__experimentalGetCurrentThemeBaseGlobalStyles,
+			getCurrentTheme,
+			canUser,
+		} = select( coreStore );
+		const currentTheme = getCurrentTheme();
 
-		return (
-			canUser( 'read', { kind: 'root', name: 'theme' } ) &&
-			__experimentalGetCurrentThemeBaseGlobalStyles()
-		);
+		return currentTheme &&
+			canUser( 'read', 'global-styles/themes', currentTheme.stylesheet )
+			? __experimentalGetCurrentThemeBaseGlobalStyles()
+			: undefined;
 	}, [] );
 
 	return [ !! baseConfig, baseConfig ];

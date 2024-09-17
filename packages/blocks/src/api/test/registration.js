@@ -1630,19 +1630,6 @@ describe( 'blocks', () => {
 			expect( getBlockBindingsSource( 'core/testing' ) ).toBeUndefined();
 		} );
 
-		// Check the `getPlaceholder` callback is correct.
-		it( 'should reject invalid getPlaceholder callback', () => {
-			registerBlockBindingsSource( {
-				name: 'core/testing',
-				label: 'testing',
-				getPlaceholder: 'should be a function',
-			} );
-			expect( console ).toHaveWarnedWith(
-				'Block bindings source getPlaceholder must be a function.'
-			);
-			expect( getBlockBindingsSource( 'core/testing' ) ).toBeUndefined();
-		} );
-
 		// Check the `canUserEditValue` callback is correct.
 		it( 'should reject invalid canUserEditValue callback', () => {
 			registerBlockBindingsSource( {
@@ -1656,6 +1643,19 @@ describe( 'blocks', () => {
 			expect( getBlockBindingsSource( 'core/testing' ) ).toBeUndefined();
 		} );
 
+		// Check the `getFieldsList` callback is correct.
+		it( 'should reject invalid getFieldsList callback', () => {
+			registerBlockBindingsSource( {
+				name: 'core/testing',
+				label: 'testing',
+				getFieldsList: 'should be a function',
+			} );
+			expect( console ).toHaveWarnedWith(
+				'Block bindings source getFieldsList must be a function.'
+			);
+			expect( getBlockBindingsSource( 'core/testing' ) ).toBeUndefined();
+		} );
+
 		// Check correct sources are registered as expected.
 		it( 'should register a valid source', () => {
 			const sourceProperties = {
@@ -1663,8 +1663,10 @@ describe( 'blocks', () => {
 				usesContext: [ 'postId' ],
 				getValues: () => 'value',
 				setValues: () => 'new values',
-				getPlaceholder: () => 'placeholder',
 				canUserEditValue: () => true,
+				getFieldsList: () => {
+					return { field: 'value' };
+				},
 			};
 			registerBlockBindingsSource( {
 				name: 'core/valid-source',
@@ -1685,8 +1687,8 @@ describe( 'blocks', () => {
 			expect( source.usesContext ).toBeUndefined();
 			expect( source.getValues ).toBeUndefined();
 			expect( source.setValues ).toBeUndefined();
-			expect( source.getPlaceholder ).toBeUndefined();
 			expect( source.canUserEditValue ).toBeUndefined();
+			expect( source.getFieldsList ).toBeUndefined();
 			unregisterBlockBindingsSource( 'core/valid-source' );
 		} );
 
@@ -1709,7 +1711,6 @@ describe( 'blocks', () => {
 			const clientOnlyProperties = {
 				getValues: () => 'values',
 				setValues: () => 'new values',
-				getPlaceholder: () => 'placeholder',
 				canUserEditValue: () => true,
 			};
 			registerBlockBindingsSource( {
