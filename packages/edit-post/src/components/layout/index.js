@@ -45,6 +45,8 @@ import { store as coreStore } from '@wordpress/core-data';
 import {
 	ResizableBox,
 	SlotFillProvider,
+	Tooltip,
+	VisuallyHidden,
 	__unstableUseNavigateRegions as useNavigateRegions,
 } from '@wordpress/components';
 import {
